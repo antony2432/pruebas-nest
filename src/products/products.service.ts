@@ -32,14 +32,31 @@ export class ProductsService {
     return { message: 'deleted successfully' }
   }
 
-  getProductById(id: string) {
-    return this.Products.find(p => p.id === id)
+  getProductById(id: string): Product | { message: string } {
+    try {
+      const findProduct = this.Products.find(p => p.id === id)
+      if (Boolean(findProduct)) {
+        return findProduct
+      } else {
+        throw new Error('id not found')
+      }
+    } catch ({ message }) {
+      return { message }
+    }
   }
 
   updateProductByID(id: string, updatedFields: UpdatedFieldsDto) {
-    const findProduct = this.getProductById(id)
-    const newProduct = Object.assign(findProduct, updatedFields)
-    this.Products = this.Products.map(p => (p.id === id ? newProduct : p))
-    return newProduct
+    try {
+      const findProduct = this.getProductById(id)
+      if ('message' in findProduct) {
+        throw new Error(findProduct.message)
+      } else {
+        const newProduct = Object.assign(findProduct, updatedFields)
+        this.Products = this.Products.map(p => (p.id === id ? newProduct : p))
+        return newProduct
+      }
+    } catch ({ message }) {
+      return { message }
+    }
   }
 }
